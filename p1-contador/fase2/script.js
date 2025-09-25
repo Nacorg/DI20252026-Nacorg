@@ -7,6 +7,7 @@ const btnReset = document.getElementById("btn-reset");
 const inputArchivo = document.getElementById("input-archivo");
 const tpl = document.getElementById("tpl-persona");
 
+
 // --------- Utilidades ---------
 function normalizaNombre(s) {
   return s.normalize("NFD").replace(/\p{Diacritic}/gu, "").trim();
@@ -92,6 +93,7 @@ async function cargarDesdeArchivoLocal(file) {
 
 // --------- Interacción ---------
 // Delegación: un solo listener para todos los botones
+
 lista.addEventListener("click", (ev) => {
   const btn = ev.target.closest("button");
   if (!btn) return;
@@ -104,12 +106,24 @@ lista.addEventListener("click", (ev) => {
   const span = card.querySelector(".contador");
   let valor = Number(span.dataset.valor || "10");
 
-  if (btn.classList.contains("btn-mas")) valor += 0.1;
-  if (btn.classList.contains("btn-menos")) valor -= 0.1;
+  if (btn.classList.contains("btn-mas") && valor<=9.9)  valor += 0.10;
+  if (btn.classList.contains("btn-menos")&& valor>=0.1) valor -= 0.10;
+
+// Limpia clases anteriores
+span.classList.remove("naranja", "rojo","verde");
+
+// Aplica color según el valor
+if (valor < 5) {
+  span.classList.add("rojo");
+} else if (valor >= 5 && valor < 6) {
+  span.classList.add("naranja");
+} else if (valor >=6) {
+  span.classList.add("verde");
+}
 
   estado.set(nombre, valor);
   span.dataset.valor = String(valor);
-  span.textContent = valor;
+  span.textContent = valor.toFixed(1);
   bump(span);
 });
 
@@ -146,4 +160,32 @@ inputArchivo.addEventListener("change", async (e) => {
 // Opción B: si falla, el usuario puede usar “Cargar archivo local”
 cargarNombresDesdeTxt("nombres.txt").catch(() => {
   setEstado("Consejo: coloca un nombres.txt junto a esta página o usa 'Cargar archivo local'.");
+});
+lista.addEventListener("keydown", (ev) => {
+  const span = ev.target.closest(".contador");
+  if (!span) return;
+
+  const card = span.closest(".persona");
+  const nombre = card?.dataset.nombre;
+  if (!estado.has(nombre)) return;
+
+  let valor = Number(span.dataset.valor || "10");
+
+  if (ev.key === "ArrowUp" && valor <= 9.9) valor += 0.1;
+  if (ev.key === "ArrowDown" && valor >= 0.1) valor -= 0.1;
+
+  valor = Number(valor.toFixed(1));
+  estado.set(nombre, valor);
+  span.dataset.valor = valor.toFixed(1);
+  span.textContent = valor.toFixed(1);
+
+  // Limpia clases de color
+  span.classList.remove("rojo", "naranja", "verde");
+
+  // Aplica color según el valor
+  if (valor < 5) span.classList.add("rojo");
+  else if (valor >= 5 && valor < 6) span.classList.add("naranja");
+  else if (valor >= 6) span.classList.add("verde");
+
+  bump(span);
 });
