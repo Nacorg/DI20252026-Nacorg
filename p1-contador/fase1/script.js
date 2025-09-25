@@ -1,4 +1,4 @@
-let contador = 10;
+let contador = 30;
 const spanContador = document.getElementById("contador");
 const btnMas = document.getElementById("btn-mas");
 const btnMenos = document.getElementById("btn-menos");
