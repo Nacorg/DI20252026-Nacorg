@@ -24,13 +24,13 @@ function efectoColorDelContador() {
 
 btnMas.addEventListener("click", () => {
   if(contador > 9.9) return;
-  contador += 1;
+  contador += 0.5;
   actualizarContador();
 });
 
 btnMenos.addEventListener("click", () => {
   if(contador < 0.1) return;
-  contador -= 1;
+  contador -= 0.5;
   actualizarContador();
 });
 
