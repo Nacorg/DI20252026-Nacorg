@@ -108,6 +108,15 @@ lista.addEventListener("click", (ev) => {
 
   if (btn.classList.contains("btn-mas") && valor<=9.9)  valor += 0.10;
   if (btn.classList.contains("btn-menos")&& valor>=0.1) valor -= 0.10;
+  if (btn.classList.contains("btn-suspender")) { valor=0;
+
+  span.classList.remove("rojo", "naranja", "verde");
+  span.classList.add("rojo");
+
+  bump(span);
+  setEstado(`${nombre} ha sido suspendido. Nota puesta: 0.`);
+}
+
 
 // Limpia clases anteriores
 span.classList.remove("naranja", "rojo","verde");
@@ -154,6 +163,66 @@ inputArchivo.addEventListener("change", async (e) => {
     inputArchivo.value = "";
   }
 });
+function actualizarSeleccionados(delta) {
+  const seleccionados = lista.querySelectorAll(".selector:checked");
+  for (const checkbox of seleccionados) {
+    const card = checkbox.closest(".persona");
+    const nombre = card.dataset.nombre;
+    const span = card.querySelector(".contador");
+    let valor = Number(span.dataset.valor || "10");
+
+    valor += delta;
+    valor = Math.min(10, Math.max(0, Number(valor.toFixed(1))));
+
+    estado.set(nombre, valor);
+    span.dataset.valor = valor.toFixed(1);
+    span.textContent = valor.toFixed(1);
+
+    span.classList.remove("rojo", "naranja", "verde");
+    if (valor < 5) span.classList.add("rojo");
+    else if (valor >= 5 && valor < 6) span.classList.add("naranja");
+    else if (valor >= 6) span.classList.add("verde");
+
+    bump(span);
+  }
+}
+
+document.getElementById("btn-subir-seleccion").addEventListener("click", () => {
+  actualizarSeleccionados(0.10);
+});
+
+document.getElementById("btn-bajar-seleccion").addEventListener("click", () => {
+  actualizarSeleccionados(-0.10);
+});
+document.getElementById("btn-aleatorio").addEventListener("click", () => {
+  const personas = Array.from(lista.querySelectorAll(".persona"));
+  if (personas.length === 0) return;
+
+  // Selecciona una al azar
+  const aleatoria = personas[Math.floor(Math.random() * personas.length)];
+  const nombre = aleatoria.dataset.nombre;
+  const span = aleatoria.querySelector(".contador");
+
+  let valor = Number(span.dataset.valor || "10");
+
+  // Decide si subir o bajar
+  const delta = Math.random() < 0.5 ? -0.5 : 0.5;
+  valor += delta;
+  valor = Math.min(10, Math.max(0, Number(valor.toFixed(1))));
+
+  estado.set(nombre, valor);
+  span.dataset.valor = valor.toFixed(1);
+  span.textContent = valor.toFixed(1);
+
+  // Actualiza color
+  span.classList.remove("rojo", "naranja", "verde");
+  if (valor < 5) span.classList.add("rojo");
+  else if (valor >= 5 && valor < 6) span.classList.add("naranja");
+  else if (valor >= 6) span.classList.add("verde");
+
+  bump(span);
+  setEstado(`Se ha modificado la nota de ${nombre} en ${delta > 0 ? '+' : ''}${delta}`);
+});
 
 // --------- Bootstrap ---------
 // Opción A (recomendada en local con live server): intenta cargar nombres.txt
@@ -171,8 +240,8 @@ lista.addEventListener("keydown", (ev) => {
 
   let valor = Number(span.dataset.valor || "10");
 
-  if (ev.key === "ArrowUp" && valor <= 9.9) valor += 0.1;
-  if (ev.key === "ArrowDown" && valor >= 0.1) valor -= 0.1;
+  if (ev.key === "ArrowRight" && valor <= 9.9) valor += 0.1;
+  if (ev.key === "ArrowLeft" && valor >= 0.1) valor -= 0.1;
 
   valor = Number(valor.toFixed(1));
   estado.set(nombre, valor);
